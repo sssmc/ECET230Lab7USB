@@ -67,9 +67,9 @@ namespace MeadowApp
             digitalInputs[3] = Device.CreateDigitalInputPort(Device.Pins.D04, InterruptMode.EdgeBoth);
 
             digitalOutputs[0] = Device.CreateDigitalOutputPort(Device.Pins.D05, false);
-            digitalOutputs[0] = Device.CreateDigitalOutputPort(Device.Pins.D06, false);
-            digitalOutputs[0] = Device.CreateDigitalOutputPort(Device.Pins.D07, false);
-            digitalOutputs[0] = Device.CreateDigitalOutputPort(Device.Pins.D08, false);
+            digitalOutputs[1] = Device.CreateDigitalOutputPort(Device.Pins.D06, false);
+            digitalOutputs[2] = Device.CreateDigitalOutputPort(Device.Pins.D07, false);
+            digitalOutputs[3] = Device.CreateDigitalOutputPort(Device.Pins.D08, false);
 
             onboardLed = new RgbPwmLed(
                 redPwmPin: Device.Pins.OnboardLedRed,
@@ -141,7 +141,47 @@ namespace MeadowApp
 
         void SerialPort_MessageReceived(object sender, SerialMessageData e)
         {
-            Console.WriteLine($"{e.GetMessageString(Encoding.UTF8)}");    
+            string packet = e.GetMessageString(Encoding.UTF8);
+            Console.WriteLine($"Packet Recevied: {packet}");
+            if(packet.Substring(0,3) == "###")
+            {
+                //We have a valid header
+                int checksumRecevied = Convert.ToInt16(packet.Substring(7, 3));
+                int checksumCalculated = 0;
+                byte[] packetByteArray = System.Text.Encoding.Unicode.GetBytes(packet.Substring(0,7));
+                foreach(byte Byte in packetByteArray)
+                {
+                    checksumCalculated += Byte;
+                }
+                if(checksumRecevied == checksumCalculated)
+                {
+                    Console.WriteLine("Valid Checksum");
+                    for(int i = 0; i < 4; i++)
+                    {
+                        if(packet.Substring(i + 3,1) == "1")
+                        {
+                            digitalOutputs[i].State = true;
+                            Console.WriteLine($"Output #{i+3} set HIGH");
+                        }else if(packet.Substring(i + 3, 1) == "0")
+                        {
+                            digitalOutputs[i].State = false;
+                            Console.WriteLine($"Output #{i+3} set LOW");
+                        }
+                        else
+                        {
+                            Console.WriteLine($"Data Parsing Error at bit #{i+3}");
+                        }
+                    }
+                }
+                else
+                {
+                    Console.WriteLine($"Checksum Error. Received:{checksumRecevied} - Calculated:{checksumCalculated}");
+                }
+            }
+            else
+            {
+                Console.WriteLine("Invalid Packet Header");
+            }
         }
 
         public override Task Run()
@@ -187,7 +227,7 @@ namespace MeadowApp
 
                 buffer = Encoding.UTF8.GetBytes(outputString);
                 serialPort.Write(buffer);
-                Console.WriteLine(outputString);
+                //Console.WriteLine(outputString);
                 Thread.Sleep(100);
             }
 
