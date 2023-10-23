@@ -79,7 +79,7 @@ namespace MeadowApp
 
             serialPort = Device.CreateSerialMessagePort(
                 Device.PlatformOS.GetSerialPortName("COM1"),
-                suffixDelimiter: Encoding.UTF8.GetBytes("\r\n"),
+                suffixDelimiter: Encoding.UTF8.GetBytes("\n"),
                 preserveDelimiter: true);
 
             serialPort.MessageReceived += SerialPort_MessageReceived;
@@ -148,7 +148,7 @@ namespace MeadowApp
                 //We have a valid header
                 int checksumRecevied = Convert.ToInt16(packet.Substring(7, 3));
                 int checksumCalculated = 0;
-                byte[] packetByteArray = System.Text.Encoding.Unicode.GetBytes(packet.Substring(0,7));
+                byte[] packetByteArray = System.Text.Encoding.Unicode.GetBytes(packet.Substring(3,4));
                 foreach(byte Byte in packetByteArray)
                 {
                     checksumCalculated += Byte;
@@ -213,7 +213,7 @@ namespace MeadowApp
 
                 //Checksum
                 int checkSum = 0;
-                var buffer = Encoding.UTF8.GetBytes(outputString);
+                var buffer = Encoding.UTF8.GetBytes(outputString.Substring(3,31));
 
                 foreach (byte Byte in buffer)
                 {
@@ -223,7 +223,7 @@ namespace MeadowApp
 
                 outputString += checkSum.ToString();    
 
-                outputString += "\n\r";
+                outputString += "\n";
 
                 buffer = Encoding.UTF8.GetBytes(outputString);
                 serialPort.Write(buffer);

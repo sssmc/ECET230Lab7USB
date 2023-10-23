@@ -4,22 +4,436 @@
              x:Class="ECET230Lab7USBDesktop.MainPage">
 
     <ScrollView>
-        <VerticalStackLayout
-            Spacing="25"
-            Padding="30,0"
-            VerticalOptions="Center">
-
-            <Picker 
-                x:Name="comPortPicker"/>
-
-            <Button
-                x:Name="comPortStartButton"
-                Text="Click me"
-                Clicked="comPortStartButton_Clicked"/>
-
+        <VerticalStackLayout>
             <Label
-                x:Name="rawPacketLabel"/>
+                Text="ECET Lab 7 Serial Data Viewer"
+                FontSize="Large"
+                HorizontalOptions="Center"
+                Margin="20"/>
+            <Label
+                Text="Sebastien Robitaille"
+                FontSize="Medium"
+                HorizontalOptions="Center"/>
+            <HorizontalStackLayout>
+                <VerticalStackLayout>
+                    <Label
+                        Text="COM Port"
+                        VerticalOptions="Center"
+                        FontSize="Medium"
+                        Margin="20"/>
+                    <HorizontalStackLayout>
+                        <Picker 
+                            x:Name="comPortPicker"
+                            Margin="20"/>
+                        <Button
+                            x:Name="comPortStartButton"
+                            Text="Open"
+                            Clicked="comPortStartButton_Clicked"
+                            HeightRequest="50"
+                            VerticalOptions="Start"
+                            Margin="20"
+                            />
+                    </HorizontalStackLayout>
+                </VerticalStackLayout>
+                <VerticalStackLayout
+                    Margin="50">
+                    <Label
+                        Text="Packet Data"
+                        FontSize="Medium"
+                        HorizontalOptions="Center"
+                        Margin="20"/>
+                    <Label
+                        Text="############################################"
+                        HorizontalOptions="Center"
+                        Margin="20"
+                        x:Name="rawPacketLabel"/>
+                    <HorizontalStackLayout>
+                        <VerticalStackLayout>
+                            <Label
+                                Text="Packet Count"
+                                Margin="10"
+                                />
+                            <Label
+                                x:Name="rawPacketCountLabel"
+                                Text="000"
+                                Margin="10"
+                                HorizontalOptions="Center"/>
+                        </VerticalStackLayout>
+                        <VerticalStackLayout>
+                            <Label
+                                Text="ADC 0"
+                                Margin="10"
+                                />
+                            <Label
+                                x:Name="rawADC0Label"
+                                Text="0000"
+                                Margin="10"
+                                HorizontalOptions="Center"/>
+                        </VerticalStackLayout>
+                        <VerticalStackLayout>
+                            <Label
+                                Text="ADC 1"
+                                Margin="10"
+                                />
+                            <Label
+                                x:Name="rawADC1Label"
+                                Text="0000"
+                                Margin="10"
+                                HorizontalOptions="Center"/>
+                        </VerticalStackLayout>
+                        <VerticalStackLayout>
+                            <Label
+                                Text="ADC 2"
+                                Margin="10"
+                                />
+                            <Label
+                                x:Name="rawADC2Label"
+                                Text="0000"
+                                Margin="10"
+                                HorizontalOptions="Center"/>
+                        </VerticalStackLayout>
+                        <VerticalStackLayout>
+                            <Label
+                                Text="ADC 3"
+                                Margin="10"
+                                />
+                            <Label
+                                x:Name="rawADC3Label"
+                                Text="0000"
+                                Margin="10"
+                                HorizontalOptions="Center"/>
+                        </VerticalStackLayout>
+                        <VerticalStackLayout>
+                            <Label
+                                Text="ADC 4"
+                                Margin="10"
+                                />
+                            <Label
+                                x:Name="rawADC4Label"
+                                Text="0000"
+                                Margin="10"
+                                HorizontalOptions="Center"/>
+                        </VerticalStackLayout>
+                        <VerticalStackLayout>
+                            <Label
+                                Text="ADC 5"
+                                Margin="10"
+                                />
+                            <Label
+                                x:Name="rawADC5Label"
+                                Text="0000"
+                                Margin="10"
+                                HorizontalOptions="Center"/>
+                        </VerticalStackLayout>
+                        <VerticalStackLayout>
+                            <Label
+                                Text="Digital Inputs"
+                                Margin="10"
+                                />
+                            <Label
+                                x:Name="rawDigitalInputsLabel"
+                                Text="0 0 0 0"
+                                Margin="10"
+                                HorizontalOptions="Center"/>
+                        </VerticalStackLayout>
+                        <VerticalStackLayout>
+                            <Label
+                                Text="Checksum Recevied"
+                                Margin="10"
+                                />
+                            <Label
+                                x:Name="rawChecksumLabel"
+                                Text="000"
+                                Margin="10"
+                                HorizontalOptions="Center"/>
+                        </VerticalStackLayout>
+                        <VerticalStackLayout>
+                            <Label
+                                Text="Checksum Calculated"
+                                Margin="10"
+                                />
+                            <Label
+                                x:Name="checksumCalculatedLabel"
+                                Text="000"
+                                Margin="10"
+                                HorizontalOptions="Center"/>
+                        </VerticalStackLayout>
 
+                    </HorizontalStackLayout>
+                </VerticalStackLayout>
+                <VerticalStackLayout
+                    Margin="50">
+                    <Label
+                        Text="Packet Stats"
+                        FontSize="Medium"
+                        Margin="20"
+                        HorizontalOptions="Center"
+                        />
+                    <HorizontalStackLayout>
+                        <VerticalStackLayout>
+                            <Label
+                                Text="Packets Lost"
+                                Margin="10"/>
+                            <Label
+                                Text="00(0.00%)"
+                                x:Name="packLossLabel"
+                                Margin="10"
+                                HorizontalOptions="Center"/>
+                        </VerticalStackLayout>
+                        <VerticalStackLayout>
+                            <Label
+                                Text="Packets Received"
+                                Margin="10"/>
+                            <Label
+                                Text="0000"
+                                x:Name="packetsReceivedLabel"
+                                Margin="10"
+                                HorizontalOptions="Center"/>
+                        </VerticalStackLayout>
+                    </HorizontalStackLayout>
+                </VerticalStackLayout>
+            </HorizontalStackLayout>
+            <HorizontalStackLayout>
+                <VerticalStackLayout
+                    HorizontalOptions="Start">
+                    <Label
+                        Text="ADC Inputs"
+                        FontSize="Medium"
+                        HorizontalOptions="Center"
+                        Margin="20"/>
+                    <HorizontalStackLayout>
+                        <VerticalStackLayout>
+                            <Label
+                                Text="ADC 0"
+                                Margin="10"/>
+                            <HorizontalStackLayout>
+                                <Label
+                                    Text="0V"
+                                    Margin="2"/>
+                                <ProgressBar
+                                    x:Name="adc0ProgressBar"
+                                    Progress="0.5"
+                                    Margin="10"
+                                    WidthRequest="200"
+                                    HorizontalOptions="Start"/>
+                                <Label
+                                    Text="3.3V"
+                                    Margin="2"/>
+                            </HorizontalStackLayout>
+                            <Label
+                                Text="ADC 1"
+                                Margin="10"/>
+                            <HorizontalStackLayout>
+                                <Label
+                                    Text="0V"
+                                    Margin="2"/>
+                                <ProgressBar
+                                    x:Name="adc1ProgressBar"
+                                    Progress="0.5"
+                                    Margin="10"
+                                    WidthRequest="200"
+                                    HorizontalOptions="Start"/>
+                                <Label
+                                    Text="3.3V"
+                                    Margin="2"/>
+                            </HorizontalStackLayout>
+                        </VerticalStackLayout>
+                        <VerticalStackLayout>
+                            <Label
+                                Text="ADC 2"
+                                Margin="10"/>
+                            <HorizontalStackLayout>
+                                <Label
+                                    Text="0V"
+                                    Margin="2"/>
+                                <ProgressBar
+                                    x:Name="adc2ProgressBar"
+                                    Progress="0.5"
+                                    Margin="10"
+                                    WidthRequest="200"
+                                    HorizontalOptions="Start"/>
+                                <Label
+                                    Text="3.3V"
+                                    Margin="2"/>
+                            </HorizontalStackLayout>
+                            <Label
+                                Text="ADC 3"
+                                Margin="10"/>
+                            <HorizontalStackLayout>
+                                <Label
+                                    Text="0V"
+                                    Margin="2"/>
+                                <ProgressBar
+                                    x:Name="adc3ProgressBar"
+                                    Progress="0.5"
+                                    Margin="10"
+                                    WidthRequest="200"
+                                    HorizontalOptions="Start"/>
+                                <Label
+                                    Text="3.3V"
+                                    Margin="2"/>
+                            </HorizontalStackLayout>
+                        </VerticalStackLayout>
+                        <VerticalStackLayout
+                            HorizontalOptions="Start">
+                            <Label
+                                Text="ADC 4"
+                                Margin="10"/>
+                            <HorizontalStackLayout>
+                                <Label
+                                    Text="0V"
+                                    Margin="2"/>
+                                <ProgressBar
+                                    x:Name="adc4ProgressBar"
+                                    Progress="0.5"
+                                    Margin="10"
+                                    WidthRequest="200"
+                                    HorizontalOptions="Start"/>
+                                <Label
+                                    Text="3.3V"
+                                    Margin="2"/>
+                            </HorizontalStackLayout>
+                            <Label
+                                Text="ADC 5"
+                                Margin="10"/>
+                            <HorizontalStackLayout>
+                                <Label
+                                    Text="0V"
+                                    Margin="2"/>
+                                <ProgressBar
+                                    x:Name="adc5ProgressBar"
+                                    Progress="0.5"
+                                    Margin="10"
+                                    WidthRequest="200"
+                                    HorizontalOptions="Start"/>
+                                <Label
+                                    Text="3.3V"
+                                    Margin="2"/>
+                            </HorizontalStackLayout>
+                        </VerticalStackLayout>
+                    </HorizontalStackLayout>
+                </VerticalStackLayout>
+                <VerticalStackLayout>
+                    <Label
+                        Text="Digital Inputs"
+                        FontSize="Medium"
+                        HorizontalOptions="Center"
+                        Margin="20"/>
+                    <HorizontalStackLayout>
+                        <VerticalStackLayout>
+                            <Label
+                                Text="Digital Input 0"
+                                Margin="10"/>
+                            <Ellipse
+                                x:Name="digitalInput0Ellipse"
+                                Fill="DarkGray"
+                                WidthRequest="50"
+                                HeightRequest="50"
+                                Margin="20"
+                                Stroke="Black"
+                                StrokeThickness="3"/>
+                        </VerticalStackLayout>
+                        <VerticalStackLayout>
+                            <Label
+                                Text="Digital Input 1"
+                                Margin="10"/>
+                            <Ellipse
+                                x:Name="digitalInput1Ellipse"
+                                Fill="DarkGray"
+                                WidthRequest="50"
+                                HeightRequest="50"
+                                Margin="20"
+                                Stroke="Black"
+                                StrokeThickness="3"/>
+                        </VerticalStackLayout>
+                        <VerticalStackLayout>
+                            <Label
+                                Text="Digital Input 2"
+                                Margin="10"/>
+                            <Ellipse
+                                x:Name="digitalInput2Ellipse"
+                                Fill="DarkGray"
+                                WidthRequest="50"
+                                HeightRequest="50"
+                                Margin="20"
+                                Stroke="Black"
+                                StrokeThickness="3"/>
+                        </VerticalStackLayout>
+                        <VerticalStackLayout>
+                            <Label
+                                Text="Digital Input 3"
+                                Margin="10"/>
+                            <Ellipse
+                                x:Name="digitalInput3Ellipse"
+                                Fill="DarkGray"
+                                WidthRequest="50"
+                                HeightRequest="50"
+                                Margin="20"
+                                Stroke="Black"
+                                StrokeThickness="3"/>
+                        </VerticalStackLayout>
+                        
+                    </HorizontalStackLayout>
+                </VerticalStackLayout>
+            </HorizontalStackLayout>
+            <HorizontalStackLayout>
+                <VerticalStackLayout>
+                    <Label
+                        Text="Digital Output Control"
+                        FontSize="Medium"
+                        HorizontalOptions="Center"
+                        Margin="20"/>
+                    <HorizontalStackLayout>
+                        <VerticalStackLayout>
+                            <Label
+                                Text="Digital Output 0"
+                                Margin="10"/>
+                            <Switch
+                                x:Name="digitalOutput0Switch"
+                                Margin="10"
+                                Toggled="digitalOutput0Switch_Toggled"/>
+                        </VerticalStackLayout>
+                        <VerticalStackLayout>
+                            <Label
+                                Text="Digital Output 1"
+                                Margin="10"/>
+                            <Switch
+                                x:Name="digitalOutput1Switch"
+                                Margin="10"
+                                Toggled="digitalOutput1Switch_Toggled"/>
+                        </VerticalStackLayout>
+                        <VerticalStackLayout>
+                            <Label
+                                Text="Digital Output 2"
+                                Margin="10"/>
+                            <Switch
+                                x:Name="digitalOutput2Switch"
+                                Margin="10"
+                                Toggled="digitalOutput2Switch_Toggled"/>
+                        </VerticalStackLayout>
+                        <VerticalStackLayout>
+                            <Label
+                                Text="Digital Output 3"
+                                Margin="10"/>
+                            <Switch
+                                x:Name="digitalOutput3Switch"
+                                Margin="10"
+                                Toggled="digitalOutput3Switch_Toggled"/>
+                        </VerticalStackLayout>
+                    </HorizontalStackLayout>
+                    <VerticalStackLayout>
+                        <Label
+                            Text="Raw Packet Sent"
+                            HorizontalOptions="Center"
+                            Margin="10"/>
+                        <Label
+                            Text="###p##0000c##"
+                            x:Name="rawPacketSentLabel"
+                            HorizontalOptions="Center"
+                            Margin="10"/>
+                    </VerticalStackLayout>
+                </VerticalStackLayout>
+            </HorizontalStackLayout>
         </VerticalStackLayout>
     </ScrollView>
 
