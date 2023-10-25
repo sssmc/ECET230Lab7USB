@@ -47,6 +47,8 @@
                         HorizontalOptions="Center"
                         Margin="20"
                         x:Name="rawPacketLabel"/>
+                    <Label
+                        x:Name="packetErrorMessageLabel"/>
                     <HorizontalStackLayout>
                         <VerticalStackLayout>
                             <Label

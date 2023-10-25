@@ -64,136 +64,162 @@ public partial class MainPage : ContentPage
 	private void MyMainThreadCode()
 	{
 		//Set the raw packet data lable text
+		bool packetError = false;
+
 		rawPacketLabel.Text = newPacket;
 
-        //Verify Checksum
-        try
-        {
+		//Check for the correct header
+		if (newPacket.Substring(0, 3) != "###")
+		{
+			packetErrorMessageLabel.Text = "Header Error";
+			packetError = true;
+		}
+
+		//Check for the correct packet length
+		if (newPacket.Length != 37)
+		{
+			packetErrorMessageLabel.Text = "Packet Length Error";
+			packetError = true;
+		}
+
+		//Parse the checksum
+		try
+		{
 			//Parse receviced checksum and set the receviced checksum lable text
-            receivedChecksum = Convert.ToInt16(newPacket.Substring(34, 3));
-            rawChecksumLabel.Text = receivedChecksum.ToString("D3");
-        }
-        catch (Exception)
-        {
+			receivedChecksum = Convert.ToInt16(newPacket.Substring(34, 3));
+			rawChecksumLabel.Text = receivedChecksum.ToString("D3");
+		}
+		catch (Exception)
+		{
 			//If we have an error reading the checksum
-            rawChecksumLabel.Text = "Error";
+			rawChecksumLabel.Text = "Error";
+			packetErrorMessageLabel.Text = "Checksum Parsing Error";
 			rawChecksumLabel.TextColor = Color.FromRgb(255, 0, 0);
-        }
+			packetError = true;
+		}
 
-		//Calculate the checksum
-        int calculatedChecksum = 0;
-
-		//Sum the data in the packet
-        var buffer = Encoding.UTF8.GetBytes(newPacket.Substring(3, 31));
-        foreach (byte Byte in buffer)
-        {
-            calculatedChecksum += Byte;
-        }
-
-		//Trucate the checksum
-		calculatedChecksum %= 1000;
-
-		//Set the calculated checksum lable
-        checksumCalculatedLabel.Text = calculatedChecksum.ToString("D3");
-
-		//Only displays the values if the checksums match
-        if (calculatedChecksum == receivedChecksum)
+		//If we have not had any errors so far
+		if (!packetError)
 		{
+			//Calculate the checksum
+			int calculatedChecksum = 0;
 
-			//Set the checksum text color to green
-			rawChecksumLabel.TextColor = Color.FromRgb(0, 255, 0);
-			checksumCalculatedLabel.TextColor = Color.FromRgb(0, 255, 0);
-
-			//Parse the packet count
-			int currentPacketCount = Convert.ToInt16(newPacket.Substring(3, 3));
-
-			//If this is the first packet we have receied, set inital value of lastPacketCountValue
-			if(totalPacketCount == 0)
+			//Sum the data in the packet
+			var buffer = Encoding.UTF8.GetBytes(newPacket.Substring(3, 31));
+			foreach (byte Byte in buffer)
 			{
-				lastPacketCountValue = currentPacketCount - 1;
+				calculatedChecksum += Byte;
 			}
 
-            totalPacketCount++;
-			
-			//If the last packet is not the current packet - 1(ie we have missed some packets)
-            if (currentPacketCount != lastPacketCountValue + 1)
+			//Trucate the checksum
+			calculatedChecksum %= 1000;
+
+			//Set the calculated checksum lable
+			checksumCalculatedLabel.Text = calculatedChecksum.ToString("D3");
+
+
+			//Only displays the values if the checksums match
+			if (calculatedChecksum == receivedChecksum)
 			{
-				//Check for the 999-000 roll-over case
-				if ((currentPacketCount != 0 && lastPacketCountValue != 999))
+
+				//Set the checksum text color to green
+				rawChecksumLabel.TextColor = Color.FromRgb(0, 255, 0);
+				checksumCalculatedLabel.TextColor = Color.FromRgb(0, 255, 0);
+
+				//Parse the packet count
+				int currentPacketCount = Convert.ToInt16(newPacket.Substring(3, 3));
+
+				//If this is the first packet we have receied, set inital value of lastPacketCountValue
+				if (totalPacketCount == 0)
 				{
-					//Calculate how many packets we have missed
-					totalMissedPacketCount += currentPacketCount - (lastPacketCountValue + 1);
-
+					lastPacketCountValue = currentPacketCount - 1;
 				}
-            }
 
-			//Reset the lastPacketCount value
-			lastPacketCountValue = currentPacketCount;
+				totalPacketCount++;
 
-			//Set the total packets received lable text
-			packetsReceivedLabel.Text = totalPacketCount.ToString();
+				//If the last packet is not the current packet - 1(ie we have missed some packets)
+				if (currentPacketCount != lastPacketCountValue + 1)
+				{
+					//Check for the 999-000 roll-over case
+					if ((currentPacketCount != 0 && lastPacketCountValue != 999))
+					{
+						//Calculate how many packets we have missed
+						totalMissedPacketCount += currentPacketCount - (lastPacketCountValue + 1);
 
-			//Calculated the percetage of packets lost and set the packets lost lable text
-			packLossLabel.Text = $"{totalMissedPacketCount}({(((float)totalMissedPacketCount/(float)totalPacketCount)*100.0f):00.00}%)";
+					}
+				}
 
-			//Set packet count lable from the parsed packet count
-			rawPacketCountLabel.Text = currentPacketCount.ToString("D3");
+				//Reset the lastPacketCount value
+				lastPacketCountValue = currentPacketCount;
 
-			//Parse each AD value from the packet
-			rawADCInputs[0] = Convert.ToInt16(newPacket.Substring(6, 4));
-			rawADCInputs[1] = Convert.ToInt16(newPacket.Substring(10, 4));
-			rawADCInputs[2] = Convert.ToInt16(newPacket.Substring(14, 4));
-			rawADCInputs[3] = Convert.ToInt16(newPacket.Substring(18, 4));
-			rawADCInputs[4] = Convert.ToInt16(newPacket.Substring(22, 4));
-			rawADCInputs[5] = Convert.ToInt16(newPacket.Substring(26, 4));
+				//Set the total packets received lable text
+				packetsReceivedLabel.Text = totalPacketCount.ToString();
 
-			//Display the values in the labels
-			rawADC0Label.Text = rawADCInputs[0].ToString("D4") + "mV";
-			rawADC1Label.Text = rawADCInputs[1].ToString("D4") + "mV";
-			rawADC2Label.Text = rawADCInputs[2].ToString("D4") + "mV";
-			rawADC3Label.Text = rawADCInputs[3].ToString("D4") + "mV";
-			rawADC4Label.Text = rawADCInputs[4].ToString("D4") + "mV";
-			rawADC5Label.Text = rawADCInputs[5].ToString("D4") + "mV";
+				//Calculated the percetage of packets lost and set the packets lost lable text
+				packLossLabel.Text = $"{totalMissedPacketCount}({(((float)totalMissedPacketCount / (float)totalPacketCount) * 100.0f):00.00}%)";
 
-			//Displays the values in the progress bars
-			adc0ProgressBar.Progress = (float)rawADCInputs[0] / 3300.0f;
-			adc1ProgressBar.Progress = (float)rawADCInputs[1] / 3300.0f;
-			adc2ProgressBar.Progress = (float)rawADCInputs[2] / 3300.0f;
-			adc3ProgressBar.Progress = (float)rawADCInputs[3] / 3300.0f;
-			adc4ProgressBar.Progress = (float)rawADCInputs[4] / 3300.0f;
-			adc5ProgressBar.Progress = (float)rawADCInputs[5] / 3300.0f;
+				//Set packet count lable from the parsed packet count
+				rawPacketCountLabel.Text = currentPacketCount.ToString("D3");
 
-			//For every digital input
-			string digitalInputsText = "";
-			for(int i = 0; i < 4; i++)
-			{
-				//Parse the value of each bit
-				rawDigtalInputs[i] = newPacket.Substring(i + 30, 1) == "1" ? true : false;
+				//Parse each AD value from the packet
+				rawADCInputs[0] = Convert.ToInt16(newPacket.Substring(6, 4));
+				rawADCInputs[1] = Convert.ToInt16(newPacket.Substring(10, 4));
+				rawADCInputs[2] = Convert.ToInt16(newPacket.Substring(14, 4));
+				rawADCInputs[3] = Convert.ToInt16(newPacket.Substring(18, 4));
+				rawADCInputs[4] = Convert.ToInt16(newPacket.Substring(22, 4));
+				rawADCInputs[5] = Convert.ToInt16(newPacket.Substring(26, 4));
 
-				//Update the digital inputs label
-				digitalInputsText += newPacket.Substring(i + 30, 1) + " ";
+				//Display the values in the labels
+				rawADC0Label.Text = rawADCInputs[0].ToString("D4") + "mV";
+				rawADC1Label.Text = rawADCInputs[1].ToString("D4") + "mV";
+				rawADC2Label.Text = rawADCInputs[2].ToString("D4") + "mV";
+				rawADC3Label.Text = rawADCInputs[3].ToString("D4") + "mV";
+				rawADC4Label.Text = rawADCInputs[4].ToString("D4") + "mV";
+				rawADC5Label.Text = rawADCInputs[5].ToString("D4") + "mV";
+
+				//Displays the values in the progress bars
+				adc0ProgressBar.Progress = (float)rawADCInputs[0] / 3300.0f;
+				adc1ProgressBar.Progress = (float)rawADCInputs[1] / 3300.0f;
+				adc2ProgressBar.Progress = (float)rawADCInputs[2] / 3300.0f;
+				adc3ProgressBar.Progress = (float)rawADCInputs[3] / 3300.0f;
+				adc4ProgressBar.Progress = (float)rawADCInputs[4] / 3300.0f;
+				adc5ProgressBar.Progress = (float)rawADCInputs[5] / 3300.0f;
+
+				//For every digital input
+				string digitalInputsText = "";
+				for (int i = 0; i < 4; i++)
+				{
+					//Parse the value of each bit
+					rawDigtalInputs[i] = newPacket.Substring(i + 30, 1) == "1" ? true : false;
+
+					//Update the digital inputs label
+					digitalInputsText += newPacket.Substring(i + 30, 1) + " ";
+				}
+
+				//Change the color of the circle indicator bases the the digital input
+				digitalInput0Ellipse.Fill = rawDigtalInputs[0] ? Color.FromRgb(255, 0, 0) : Color.FromRgb(128, 128, 128);
+				digitalInput1Ellipse.Fill = rawDigtalInputs[1] ? Color.FromRgb(255, 0, 0) : Color.FromRgb(128, 128, 128);
+				digitalInput2Ellipse.Fill = rawDigtalInputs[2] ? Color.FromRgb(255, 0, 0) : Color.FromRgb(128, 128, 128);
+				digitalInput3Ellipse.Fill = rawDigtalInputs[3] ? Color.FromRgb(255, 0, 0) : Color.FromRgb(128, 128, 128);
+
+				//Write the final digital inputs text to the label
+				rawDigitalInputsLabel.Text = digitalInputsText;
+
 			}
+			else
+			{
+				//If our checksums did not match
+				totalMissedPacketCount++;
 
-			//Change the color of the circle indicator bases the the digital input
-			digitalInput0Ellipse.Fill = rawDigtalInputs[0] ? Color.FromRgb(255,0,0) : Color.FromRgb(128, 128, 128);
-			digitalInput1Ellipse.Fill = rawDigtalInputs[1] ? Color.FromRgb(255, 0, 0) : Color.FromRgb(128, 128, 128);
-			digitalInput2Ellipse.Fill = rawDigtalInputs[2] ? Color.FromRgb(255, 0, 0) : Color.FromRgb(128, 128, 128);
-			digitalInput3Ellipse.Fill = rawDigtalInputs[3] ? Color.FromRgb(255, 0, 0) : Color.FromRgb(128, 128, 128);
+				//Set the checksum text color to red
+				rawChecksumLabel.TextColor = Color.FromRgb(255, 0, 0);
+				checksumCalculatedLabel.TextColor = Color.FromRgb(255, 0, 0);
 
-			//Write the final digital inputs text to the label
-			rawDigitalInputsLabel.Text = digitalInputsText;
-
+				//Display the error message
+				packetErrorMessageLabel.Text = "Checksum Error";
+			}
 		}
-		else
-		{
-			//If our checksums did not match
-			totalMissedPacketCount++;
-
-			//Set the checksum text color to red
-			rawChecksumLabel.TextColor = Color.FromRgb(255, 0, 0);
-			checksumCalculatedLabel.TextColor = Color.FromRgb(255, 0, 0);
-		}
-    }
+	}
 
     private void comPortStartButton_Clicked(object sender, EventArgs e)
     {
